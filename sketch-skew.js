@@ -8,7 +8,7 @@ const settings = {
 };
 
 const sketch = ({ context, width, height }) => {
-  let x, y, w, h;
+  let x, y, w, h, fill, stroke;
 
   const num = 20;
   const degrees = -30;
@@ -21,7 +21,13 @@ const sketch = ({ context, width, height }) => {
     w = random.range(200, 600);
     h = random.range(40, 200);
 
-    rects.push({ x, y, w, h });
+    fill = `rgba(${random.range(0, 255)}, ${random.range(
+      0,
+      255
+    )}, ${random.range(0, 255)}, 1)`;
+    stroke = "black";
+
+    rects.push({ x, y, w, h, fill, stroke });
   }
 
   return ({ context, width, height }) => {
@@ -29,14 +35,16 @@ const sketch = ({ context, width, height }) => {
     context.fillRect(0, 0, width, height);
 
     rects.forEach((rect) => {
-      const { x, y, w, h } = rect;
+      const { x, y, w, h, fill, stroke } = rect;
 
       context.save();
       context.translate(x, y);
-      context.strokeStyle = "blue";
+      context.strokeStyle = stroke;
+      context.fillStyle = fill;
 
       drawSkewedRect({ context, w, h, degrees });
       context.stroke();
+      context.fill();
 
       context.restore();
     });
