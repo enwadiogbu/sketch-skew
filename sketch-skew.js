@@ -20,6 +20,12 @@ const sketch = ({ context, width, height }) => {
   const rectColors = [random.pick(risoColors), random.pick(risoColors)];
 
   const bgColor = random.pick(risoColors).hex;
+  const mask = {
+    radius: width * 0.4,
+    sides: 3,
+    x: width * 0.5,
+    y: height * 0.58,
+  };
 
   for (let i = 0; i < num; i++) {
     x = random.range(0, width);
@@ -39,17 +45,10 @@ const sketch = ({ context, width, height }) => {
     context.fillRect(0, 0, width, height);
 
     context.save();
-    context.translate(width * 0.5, height * 0.5);
+    context.translate(mask.x, mask.y);
 
-    context.beginPath();
-    context.moveTo(0, -300);
-    context.lineTo(300, 200);
-    context.lineTo(-300, 200);
-    context.closePath();
+    drawPolygon({ context, radius: mask.radius, sides: mask.sides });
 
-    context.lineWidth = 10;
-    context.strokeStyle = "black";
-    context.stroke();
     context.clip();
 
     rects.forEach((rect) => {
@@ -57,13 +56,14 @@ const sketch = ({ context, width, height }) => {
       let shadowColor;
 
       context.save();
-      context.translate(width * -0.5, height * -0.5);
+      context.translate(-mask.x, -mask.y);
       context.translate(x, y);
+
       context.strokeStyle = stroke;
       context.fillStyle = fill;
       context.lineWidth = 10;
 
-      context.globalCompositeOperation = "blend";
+      context.globalCompositeOperation = blend;
 
       drawSkewedRect({ context, w, h, degrees });
 
@@ -86,10 +86,28 @@ const sketch = ({ context, width, height }) => {
 
       context.restore();
     });
+    context.restore();
+
+    //polygon outline
+    context.save();
+    context.translate(mask.x, mask.y);
+    context.lineWidth = 20;
+
+    drawPolygon({
+      context,
+      radius: mask.radius - context.lineWidth,
+      sides: mask.sides,
+    });
+
+    context.globalCompositeOperation = "color-burn";
+    context.strokeStyle = rectColors[0].hex;
+    context.stroke();
+
+    context.restore();
   };
-  //these dimensions are proportionate to the dimensions of the canvas
 };
 
+//these dimensions are proportionate to the dimensions of the canvas
 const drawSkewedRect = ({ context, w = 600, h = 200, degrees = -45 }) => {
   const angle = math.degToRad(degrees);
   const rx = Math.cos(angle) * w;
@@ -104,9 +122,22 @@ const drawSkewedRect = ({ context, w = 600, h = 200, degrees = -45 }) => {
   context.lineTo(rx, ry + h);
   context.lineTo(0, h);
   context.closePath();
-  context.stroke();
 
   context.restore();
+};
+
+const drawPolygon = ({ context, radius = 100, sides = 3 }) => {
+  const slice = (Math.PI * 2) / sides;
+
+  context.beginPath();
+  context.moveTo(0, -radius);
+
+  for (let i = 1; i < sides; i++) {
+    const theta = i * slice - Math.PI * 0.5;
+    context.lineTo(Math.cos(theta) * radius, Math.sin(theta) * radius);
+  }
+
+  context.closePath();
 };
 
 canvasSketch(sketch, settings);
