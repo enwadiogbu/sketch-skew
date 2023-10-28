@@ -4,13 +4,20 @@ const random = require("canvas-sketch-util/random");
 const risoColors = require("riso-colors");
 const Color = require("canvas-sketch-util/color");
 
+const seed = random.getRandomSeed();
 const settings = {
   dimensions: [1080, 1080],
   animate: true,
+  name: seed,
 };
 
 const sketch = ({ context, width, height }) => {
   let x, y, w, h, fill, stroke, blend;
+
+  random.setSeed(seed);
+  console.log(random.value());
+  console.log(random.value());
+  console.log(random.value());
 
   const num = 40;
   const degrees = -30;
